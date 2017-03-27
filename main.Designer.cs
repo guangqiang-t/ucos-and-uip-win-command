@@ -55,12 +55,17 @@
             this.trackBarLed = new System.Windows.Forms.TrackBar();
             this.colorDialogColorLed = new System.Windows.Forms.ColorDialog();
             this.groupBoxRELAY = new System.Windows.Forms.GroupBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.progressBarTemp = new System.Windows.Forms.ProgressBar();
+            this.my_check_box_relay_hk = new WindowsFormsApplication1.my_check_box();
+            this.my_check_box_relay_lk = new WindowsFormsApplication1.my_check_box();
             this.groupBoxTcp.SuspendLayout();
             this.groupBoxSendReceiveData.SuspendLayout();
             this.groupBoxPWM.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarMotor)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLed)).BeginInit();
+            this.groupBoxRELAY.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonConnect
@@ -321,12 +326,34 @@
             // 
             // groupBoxRELAY
             // 
+            this.groupBoxRELAY.Controls.Add(this.label8);
+            this.groupBoxRELAY.Controls.Add(this.label7);
+            this.groupBoxRELAY.Controls.Add(this.my_check_box_relay_hk);
+            this.groupBoxRELAY.Controls.Add(this.my_check_box_relay_lk);
             this.groupBoxRELAY.Location = new System.Drawing.Point(12, 341);
             this.groupBoxRELAY.Name = "groupBoxRELAY";
-            this.groupBoxRELAY.Size = new System.Drawing.Size(396, 100);
+            this.groupBoxRELAY.Size = new System.Drawing.Size(330, 70);
             this.groupBoxRELAY.TabIndex = 8;
             this.groupBoxRELAY.TabStop = false;
             this.groupBoxRELAY.Text = "RELAY";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(173, 32);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(32, 16);
+            this.label8.TabIndex = 12;
+            this.label8.Text = "LK:";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(9, 32);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(32, 16);
+            this.label7.TabIndex = 10;
+            this.label7.Text = "HK:";
             // 
             // progressBarTemp
             // 
@@ -336,6 +363,30 @@
             this.progressBarTemp.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBarTemp.TabIndex = 9;
             this.progressBarTemp.Value = 30;
+            // 
+            // my_check_box_relay_hk
+            // 
+            this.my_check_box_relay_hk.BackColor = System.Drawing.Color.Transparent;
+            this.my_check_box_relay_hk.Checked = 0;
+            this.my_check_box_relay_hk.CheckStyleX = WindowsFormsApplication1.CheckStyle.style1;
+            this.my_check_box_relay_hk.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.my_check_box_relay_hk.Location = new System.Drawing.Point(211, 25);
+            this.my_check_box_relay_hk.Name = "my_check_box_relay_hk";
+            this.my_check_box_relay_hk.Size = new System.Drawing.Size(87, 27);
+            this.my_check_box_relay_hk.TabIndex = 11;
+            this.my_check_box_relay_hk.Click += new System.EventHandler(this.my_check_box_relay_hk_Click);
+            // 
+            // my_check_box_relay_lk
+            // 
+            this.my_check_box_relay_lk.BackColor = System.Drawing.Color.Transparent;
+            this.my_check_box_relay_lk.Checked = 0;
+            this.my_check_box_relay_lk.CheckStyleX = WindowsFormsApplication1.CheckStyle.style1;
+            this.my_check_box_relay_lk.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.my_check_box_relay_lk.Location = new System.Drawing.Point(47, 25);
+            this.my_check_box_relay_lk.Name = "my_check_box_relay_lk";
+            this.my_check_box_relay_lk.Size = new System.Drawing.Size(87, 27);
+            this.my_check_box_relay_lk.TabIndex = 10;
+            this.my_check_box_relay_lk.Click += new System.EventHandler(this.my_check_box_relay_lk_click);
             // 
             // FormMain
             // 
@@ -364,6 +415,8 @@
             this.groupBoxPWM.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarMotor)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLed)).EndInit();
+            this.groupBoxRELAY.ResumeLayout(false);
+            this.groupBoxRELAY.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -397,6 +450,10 @@
         private System.Windows.Forms.Button buttonColorSelect;
         private System.Windows.Forms.GroupBox groupBoxRELAY;
         private System.Windows.Forms.ProgressBar progressBarTemp;
+        private WindowsFormsApplication1.my_check_box my_check_box_relay_lk;
+        private WindowsFormsApplication1.my_check_box my_check_box_relay_hk;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label7;
     }
 }
 

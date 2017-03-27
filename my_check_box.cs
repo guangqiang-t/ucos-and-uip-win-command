@@ -21,7 +21,7 @@ namespace WindowsFormsApplication1
 
     public partial class my_check_box : UserControl
     {
-        bool isCheck = false;
+        private int isCheck = 0;
 
         public my_check_box()
         {
@@ -42,7 +42,7 @@ namespace WindowsFormsApplication1
         /// <summary>
         /// 是否选中
         /// </summary>
-        public bool Checked
+        public int Checked
         {
             set { isCheck = value; this.Invalidate(); }
             get { return isCheck; }
@@ -64,14 +64,14 @@ namespace WindowsFormsApplication1
 
             if (checkStyle == CheckStyle.style1)
             {
-                bitMapOn = global::WindowsFormsApplication1.Properties.Resources.btncheckon1;
-                bitMapOff = global::WindowsFormsApplication1.Properties.Resources.btncheckoff1;
+                bitMapOn = global::WinCommand.Properties.Resources.btncheckon1;
+                bitMapOff = global::WinCommand.Properties.Resources.btncheckoff1;
 
             }
             Graphics g = e.Graphics;
             Rectangle rec = new Rectangle(0, 0, this.Size.Width, this.Size.Height);
 
-            if (isCheck)
+            if (this .isCheck != 0) 
             {
                 g.DrawImage(bitMapOn, rec);
             }
@@ -83,8 +83,28 @@ namespace WindowsFormsApplication1
 
         private void my_check_box_Click(object sender, EventArgs e)
         {
-            isCheck = !isCheck;
+            if (this.isCheck != 0)
+            {
+                this.isCheck = 0;
+            }
+            else
+            {
+                this.isCheck = 1;
+            }
             this.Invalidate();
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // my_check_box
+            // 
+            this.Name = "my_check_box";
+            this.Size = new System.Drawing.Size(89, 29);
+            this.Click += new System.EventHandler(this.my_check_box_Click);
+            this.ResumeLayout(false);
+
         }
 
     }

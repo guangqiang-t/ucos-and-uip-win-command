@@ -205,6 +205,35 @@ namespace WinCommand
                 MessageBox.Show("No Connection(s)", "Warnning");
             }
         }
+
+        private void my_check_box_relay_lk_click(object sender, EventArgs e)
+        {
+            if (s._isLink)
+            {
+                s.TcpSendData("SYS:RELAY_LK:"+ my_check_box_relay_lk.Checked+ "\0" );
+                //MessageBox.Show("SYS:RELAY_LK:" + my_check_box_relay_lk.Checked.ToString());
+                textBoxReceiveBuffer.AppendText(DateTime.Now.ToString() + " Received: \n" + Environment.NewLine + s.TcpReceiveData() + "\n");
+            }
+            else
+            {
+                MessageBox.Show("No Connection(s)", "Warnning");
+            }
+        }
+
+        private void my_check_box_relay_hk_Click(object sender, EventArgs e)
+        {
+            if (s._isLink)
+            {
+                s.TcpSendData("SYS:RELAY_HK:"+ my_check_box_relay_hk.Checked+ "\0" );
+                //MessageBox.Show("SYS:RELAY_HK:" + my_check_box_relay_hk.Checked.ToString());
+                textBoxReceiveBuffer.AppendText(DateTime.Now.ToString() + " Received: \n" + Environment.NewLine + s.TcpReceiveData() + "\n");
+            }
+            else
+            {
+                MessageBox.Show("No Connection(s)", "Warnning");
+            }
+        }
+
     }
 }
 
