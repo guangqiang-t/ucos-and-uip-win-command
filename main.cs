@@ -14,11 +14,13 @@ namespace WinCommand
 {
     public partial class FormMain : Form
     {
-        SimpleScoketTcpConnect s = new SimpleScoketTcpConnect("192.168.0.112", 8080);
+        SimpleScoketTcpConnect s = new SimpleScoketTcpConnect("192.168.0.128", 8080);
         bool SimpleScoketTcpConnectAutoSend = false;
         FileStream fs = null;
-        string FilePath = "Receive.log";
-        int cnt = 0;
+        string FilePath = "SYS.log";
+        //int cnt = 0;
+        int g_temp = 0;
+        byte[] logic = new byte[5];
         Color rgb_led = new Color();
         Color b_color = new Color();
         public FormMain()
@@ -29,7 +31,8 @@ namespace WinCommand
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            fs = File.Open(FilePath, FileMode.Append, FileAccess.Write);
+            //fs = File.Open(FilePath, FileMode.Append, FileAccess.Write);
+            
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -60,12 +63,12 @@ namespace WinCommand
                 labelIsLink.ForeColor = Color.DarkRed;
                 labelIsLink.Text = "DisConnected!";
             }
-            
+
         }
 
         private void textBoxSeverPort_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar != 8 && !char.IsDigit(e.KeyChar))
+            if (e.KeyChar != 8 && !char.IsDigit(e.KeyChar))// 8 isbackspace
             {
                 e.Handled = true;
             }
@@ -82,7 +85,7 @@ namespace WinCommand
             {
                 MessageBox.Show("No Connection(s)", "Warnning");
             }
-            }
+        }
 
         private void buttonAutoSend_Click(object sender, EventArgs e)
         {
@@ -90,58 +93,68 @@ namespace WinCommand
             {
                 if (SimpleScoketTcpConnectAutoSend)
                 {
+                    fs.Close();
+                    label1_act_temp.Text = "NO TRACE";
                     timerAutoSend.Enabled = false;
                     SimpleScoketTcpConnectAutoSend = false;
-                    buttonAutoSend.ForeColor = Color.Black;
-                    buttonAutoSend.Text = "AutoSend";
+                    button_heartbeat.ForeColor = Color.Black;
+                    button_heartbeat.Text = "HEARTBEAT";
                 }
                 else
                 {
+                    fs = File.Open(FilePath, FileMode.Append, FileAccess.Write);
                     timerAutoSend.Enabled = true;
                     SimpleScoketTcpConnectAutoSend = true;
-                    buttonAutoSend.ForeColor = Color.Red;
-                    buttonAutoSend.Text = "Stop";
+                    button_heartbeat.ForeColor = Color.Red;
+                    button_heartbeat.Text = "STOP";
                 }
             }
             else
             {
-                MessageBox.Show("No Connection(s)","Warnning");
+                MessageBox.Show("No Connection(s)", "Warnning");
             }
         }
 
         private void timerAutoSend_Tick(object sender, EventArgs e)
         {
-			    if (SimpleScoketTcpConnectAutoSend)
-                 {
-                    string rx, rx1;
-                    s.TcpSendData("#This is" + (cnt++.ToString()) + "times Send" + "\n");
-                    rx = s.TcpReceiveData();
-                    rx1 = (DateTime.Now.ToString() + " Received: " + rx + Environment.NewLine);
-                    textBoxReceiveBuffer.AppendText(rx1);
-                    if (cnt < 65530)
-                    {
-                        fs.Write(Encoding.ASCII.GetBytes(rx1), 0, rx1.Length);
-                        fs.Flush();
-                    }
-                    else
-                    {
-                        fs.Close();
-                        System.Environment.Exit(0);
-                    }
-                 }    
+            if (SimpleScoketTcpConnectAutoSend)
+            {
+                string rx, rx1;
+                s.TcpSendData("SYS:TEMP?\0");
+                rx = s.TcpReceiveData();
+                try
+                {
+                    string result = System.Text.RegularExpressions.Regex.Replace(rx, @"[^0-9]+", "");
+                    g_temp = int.Parse(result) / 25;
+                }
+                catch
+                {
+                    ;
+                }
+                
+                if (g_temp>= progressBarTemp.Minimum && g_temp <= progressBarTemp.Maximum)
+                {
+                    progressBarTemp.Value =g_temp;
+                    label1_act_temp.Text = "T="+(g_temp/4.0).ToString()+ "℃";
+                }
+                rx1 = (DateTime.Now.ToString() + " LOG: " + rx + Environment.NewLine);
+                //textBoxReceiveBuffer.AppendText(rx1);
+                fs.Write(Encoding.ASCII.GetBytes(rx1), 0, rx1.Length);
+                fs.Flush();
+            }
         }
 
 
         private void trackBarPWM_MouseUp(object sender, MouseEventArgs e)
         {
-            s.TcpSendData("SYS:LED:"+trackBarLed.Value.ToString()+"\0");
+            s.TcpSendData("SYS:LED:" + trackBarLed.Value.ToString() + "\0");
             //MessageBox.Show("SYS: LED:"+trackBarLedPWM.Value.ToString());
             textBoxReceiveBuffer.AppendText(DateTime.Now.ToString() + " Received: \n" + Environment.NewLine + s.TcpReceiveData() + "\n");
         }
 
         private void trackBarPWM_ValueChanged(object sender, EventArgs e)
         {
-            if(s._isLink)
+            if (s._isLink)
             {
                 labelLedPwm.Text = trackBarLed.Value.ToString();
             }
@@ -174,7 +187,7 @@ namespace WinCommand
         {
             if (colorDialogColorLed.ShowDialog() == DialogResult.OK)
             {
-                rgb_led= colorDialogColorLed.Color;
+                rgb_led = colorDialogColorLed.Color;
                 //MessageBox.Show(rgb_led.R.ToString());
                 b_color = Color.FromArgb(rgb_led.ToArgb());
                 buttonColorSelect.BackColor = b_color;//back color 
@@ -184,7 +197,7 @@ namespace WinCommand
                     buttonColorSelect.ForeColor = Color.FromArgb(0xFFFFFF);
                 }*/
 
-                buttonColorSelect.ForeColor = Color.FromArgb(0xFFFFFF-rgb_led.ToArgb());
+                buttonColorSelect.ForeColor = Color.FromArgb(0xFFFFFF - rgb_led.ToArgb());
             }
             else
             {
@@ -196,7 +209,7 @@ namespace WinCommand
         {
             if (s._isLink)
             {
-                s.TcpSendData("SYS:COLOR:" + rgb_led.R.ToString()+","+rgb_led.G.ToString() + "," + rgb_led.B.ToString()  + "\0");
+                s.TcpSendData("SYS:COLOR:" + rgb_led.R.ToString() + "," + rgb_led.G.ToString() + "," + rgb_led.B.ToString() + "\0");
                 //MessageBox.Show("SYS: LED:"+trackBarLedPWM.Value.ToString());
                 textBoxReceiveBuffer.AppendText(DateTime.Now.ToString() + " Received: \n" + Environment.NewLine + s.TcpReceiveData() + "\n");
             }
@@ -210,7 +223,7 @@ namespace WinCommand
         {
             if (s._isLink)
             {
-                s.TcpSendData("SYS:RELAY_LK:"+ my_check_box_relay_lk.Checked+ "\0" );
+                s.TcpSendData("SYS:RELAY_LK:" + my_check_box_relay_lk.Checked + "\0");
                 //MessageBox.Show("SYS:RELAY_LK:" + my_check_box_relay_lk.Checked.ToString());
                 textBoxReceiveBuffer.AppendText(DateTime.Now.ToString() + " Received: \n" + Environment.NewLine + s.TcpReceiveData() + "\n");
             }
@@ -224,7 +237,7 @@ namespace WinCommand
         {
             if (s._isLink)
             {
-                s.TcpSendData("SYS:RELAY_HK:"+ my_check_box_relay_hk.Checked+ "\0" );
+                s.TcpSendData("SYS:RELAY_HK:" + my_check_box_relay_hk.Checked + "\0");
                 //MessageBox.Show("SYS:RELAY_HK:" + my_check_box_relay_hk.Checked.ToString());
                 textBoxReceiveBuffer.AppendText(DateTime.Now.ToString() + " Received: \n" + Environment.NewLine + s.TcpReceiveData() + "\n");
             }
@@ -234,6 +247,330 @@ namespace WinCommand
             }
         }
 
+        private void textBoxSeverIP_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar != '.' && e.KeyChar != 8 && !char.IsDigit(e.KeyChar))// 8 isbackspace
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void checkBoxbit7_Click(object sender, EventArgs e)
+        {
+            if (s._isLink)
+            {
+                sync_r();
+            }
+            else
+            {
+                MessageBox.Show("No Connection(s)", "Warnning");
+            }
+        }
+
+        private void checkBoxbit6_Click(object sender, EventArgs e)
+        {
+            if (s._isLink)
+            {
+                sync_r();
+            }
+            else
+            {
+                MessageBox.Show("No Connection(s)", "Warnning");
+            }
+        }
+
+        private void checkBoxbit5_Click(object sender, EventArgs e)
+        {
+            if (s._isLink)
+            {
+                sync_r();
+            }
+            else
+            {
+                MessageBox.Show("No Connection(s)", "Warnning");
+            }
+        }
+
+        private void checkBoxbit4_Click(object sender, EventArgs e)
+        {
+            if (s._isLink)
+            {
+                sync_r();
+            }
+            else
+            {
+                MessageBox.Show("No Connection(s)", "Warnning");
+            }
+        }
+
+        private void checkBoxbit3_Click(object sender, EventArgs e)
+        {
+            if (s._isLink)
+            {
+                sync_r();
+            }
+            else
+            {
+                MessageBox.Show("No Connection(s)", "Warnning");
+            }
+        }
+
+        private void checkBoxbit2_Click(object sender, EventArgs e)
+        {
+            if (s._isLink)
+            {
+                sync_r();
+            }
+            else
+            {
+                MessageBox.Show("No Connection(s)", "Warnning");
+            }
+        }
+
+        private void checkBoxbit1_Click(object sender, EventArgs e)
+        {
+            if (s._isLink)
+            {
+                sync_r();
+            }
+            else
+            {
+                MessageBox.Show("No Connection(s)", "Warnning");
+            }
+        }
+
+        private void checkBoxbit0_Click(object sender, EventArgs e)
+        {
+            if (s._isLink)
+            {
+                sync_r();
+            }
+            else
+            {
+                MessageBox.Show("No Connection(s)", "Warnning");
+            }
+        }
+
+        private void sync_r()
+        {
+            logic[0] = 0;
+            if (checkBoxbit7.Checked == true) logic[0] += 128;
+            if (checkBoxbit6.Checked == true) logic[0] += 64;
+            if (checkBoxbit5.Checked == true) logic[0] += 32;
+            if (checkBoxbit4.Checked == true) logic[0] += 16;
+            if (checkBoxbit3.Checked == true) logic[0] += 8;
+            if (checkBoxbit2.Checked == true) logic[0] += 4;
+            if (checkBoxbit1.Checked == true) logic[0] += 2;
+            if (checkBoxbit0.Checked == true) logic[0] += 1;
+            textBoxlog0.Text = logic[0].ToString();
+        }
+        private void sync_l()
+        {
+            try
+            {
+                if (textBoxlog0.Text == "")
+                {
+                    logic[0] = 0;
+                }
+                else
+                {
+                    logic[0] = byte.Parse(textBoxlog0.Text);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Wrong Number!", "Warnning");
+                textBoxlog0.Text = "";
+            }
+            int tmp = logic[0];
+            if (tmp >= 128) { checkBoxbit7.Checked = true; tmp -= 128; } else { checkBoxbit7.Checked = false; }
+            if (tmp >= 64) { checkBoxbit6.Checked = true; tmp -= 64; } else { checkBoxbit6.Checked = false; }
+            if (tmp >= 32) { checkBoxbit5.Checked = true; tmp -= 32; } else { checkBoxbit5.Checked = false; }
+            if (tmp >= 16) { checkBoxbit4.Checked = true; tmp -= 16; } else { checkBoxbit4.Checked = false; }
+            if (tmp >= 8) { checkBoxbit3.Checked = true; tmp -= 8; } else { checkBoxbit3.Checked = false; }
+            if (tmp >= 4) { checkBoxbit2.Checked = true; tmp -= 4; } else { checkBoxbit2.Checked = false; }
+            if (tmp >= 2) { checkBoxbit1.Checked = true; tmp -= 2; } else { checkBoxbit1.Checked = false; }
+            if (tmp >= 1) { checkBoxbit0.Checked = true; tmp -= 1; } else { checkBoxbit0.Checked = false; }
+
+        }
+
+        private void textBoxlog0_TextChanged(object sender, EventArgs e)
+        {
+            sync_l();
+        }
+        private void all_reset()
+        {
+
+        }
+
+        private void textBoxlog1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar != 8 && !char.IsDigit(e.KeyChar))// 8 isbackspace
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void textBoxlog2_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar != 8 && !char.IsDigit(e.KeyChar))// 8 isbackspace
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void textBoxlog3_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar != 8 && !char.IsDigit(e.KeyChar))// 8 isbackspace
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void textBoxlog4_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar != 8 && !char.IsDigit(e.KeyChar))// 8 isbackspace
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void textBoxlog1_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (textBoxlog1.Text == "")
+                {
+                    logic[1] = 0;
+                }
+                else
+                {
+                    logic[1] = byte.Parse(textBoxlog1.Text);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Wrong Number!", "Warnning");
+                textBoxlog1.Text = "";
+            }
+        }
+
+        private void textBoxlog2_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (textBoxlog2.Text == "")
+                {
+                    logic[2] = 0;
+                }
+                else
+                {
+                    logic[2] = byte.Parse(textBoxlog2.Text);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Wrong Number!", "Warnning");
+                textBoxlog2.Text = "";
+            }
+        }
+
+        private void textBoxlog3_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (textBoxlog3.Text == "")
+                {
+                    logic[3] = 0;
+                }
+                else
+                {
+                    logic[3] = byte.Parse(textBoxlog3.Text);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Wrong Number!", "Warnning");
+                textBoxlog3.Text = "";
+            }
+        }
+
+        private void textBoxlog4_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (textBoxlog4.Text == "")
+                {
+                    logic[4] = 0;
+                }
+                else
+                {
+                    logic[4] = byte.Parse(textBoxlog4.Text);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Wrong Number!", "Warnning");
+                textBoxlog4.Text = "";
+            }
+        }
+
+        private void textBoxlog0_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar != 8 && !char.IsDigit(e.KeyChar))// 8 isbackspace
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void button_logic_sync_Click(object sender, EventArgs e)
+        {
+            int n = 5;
+            if (textBoxlog4.Text != "")
+            {
+                n = 5;
+            }
+            else if (textBoxlog3.Text != "")
+            {
+                n = 4;
+            }
+            else if (textBoxlog2.Text != "")
+            {
+                n = 3;
+            }
+            else if (textBoxlog1.Text != "")
+            {
+                n = 2;
+            }
+            else
+            {
+                n = 1;
+            }
+
+            int tmp = n-1;
+            string s_tmp = "SYS:LOGIC:" + n.ToString() + ";" + logic[0].ToString();
+            for( int i=1; tmp>0;tmp--)
+            {
+                s_tmp += "," + logic[i++].ToString();
+            }
+           // MessageBox.Show(s_tmp);
+            s_tmp += "\0";
+
+            s.TcpSendData(s_tmp);
+            textBoxReceiveBuffer.AppendText(DateTime.Now.ToString() + " Received: \n" + Environment.NewLine + s.TcpReceiveData() + "\n");
+        }
+
+        private void FormMain_DoubleClick(object sender, EventArgs e)
+        {
+            AboutBox1 a = new AboutBox1();
+            a.Show();
+        }
+
+        private void groupBoxSendReceiveData_Enter(object sender, EventArgs e)
+        {
+
+        }
     }
+
 }
 

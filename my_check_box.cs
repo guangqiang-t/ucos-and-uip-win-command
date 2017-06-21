@@ -83,15 +83,15 @@ namespace WindowsFormsApplication1
 
         private void my_check_box_Click(object sender, EventArgs e)
         {
-            if (this.isCheck != 0)
-            {
-                this.isCheck = 0;
-            }
-            else
-            {
-                this.isCheck = 1;
-            }
-            this.Invalidate();
+                if (this.isCheck != 0)
+                {
+                    this.isCheck = 0;
+                }
+                else
+                {
+                    this.isCheck = 1;
+                }
+                this.Invalidate();
         }
 
         private void InitializeComponent()

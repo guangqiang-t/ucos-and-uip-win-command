@@ -87,7 +87,7 @@ namespace SimpleScoketTcp
             {
                 this.scoket_tcp_connect.Close();
             }
-            catch (Exception e)
+            catch
             {
                 return false;
             }
@@ -101,7 +101,7 @@ namespace SimpleScoketTcp
             {
                 this.scoket_tcp_connect.Close(timeout);
             }
-            catch (Exception e)
+            catch
             {
                 return false;
             }
@@ -134,7 +134,7 @@ namespace SimpleScoketTcp
                 cnt = scoket_tcp_connect.Receive(temp, temp.Length, SocketFlags.None);
                 Console.WriteLine(cnt);
             }
-            catch (System.NullReferenceException e)
+            catch
             {
                 return "Receive ERROR ";
             }
